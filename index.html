@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HLS Stream Player</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+      font-family: sans-serif;
+    }
+    #player-container {
+      position: relative;
+      width: 80%;
+      max-width: 800px;
+    }
+    video {
+      width: 100%;
+      border-radius: 8px;
+      background: #000;
+    }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 16px;
+      border-radius: 5px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="player-container">
+  <video id="video" controls></video>
+  <div id="loading">Loading Stream...</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+  const video = document.getElementById('video');
+  const loading = document.getElementById('loading');
+
+  // Your HLS link
+  const videoSrc = 'https://cdn30091.slime403heq.com/stream2/i-cdn-0/fe9e260c86f94803a1f2c98ecd90a49f/MJTMsp1RshGTygnMNRUR2N2MSlnWXZEdMNDZzQWe5MDZzMmdZJTO1R2RWVHZDljekhkSsl1VwYnWtx2cihVT21keRpXTqVENO1mSt5kenpnTtJ1aNRUV04keBlXWUtWMOdUSz4kaStmWUdWP:1769999776:152.59.47.198:8e46aca4d278af4aabf688558ef766bb5df69bb38654930b36b44b34ca2c575e:=0EVVlHTqVVNMpWUzwkaFVzTB1TP/480/index.m3u8'
+  
+  
+  function showLoading(show) {
+    loading.style.display = show ? 'block' : 'none';
+  }
+
+  showLoading(true);
+
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(videoSrc);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      showLoading(false);
+      video.play().catch(() => {});
+    });
+    hls.on(Hls.Events.ERROR, function(event, data) {
+      showLoading(false);
+      alert('Error loading HLS stream: ' + data.details);
+      console.error(data);
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari / iOS
+    video.src = videoSrc;
+    video.addEventListener('loadedmetadata', () => {
+      showLoading(false);
+      video.play().catch(() => {});
+    });
+  } else {
+    showLoading(false);
+    alert('HLS is not supported in this browser.');
+  }
+</script>
+
+</body>
+</html>
+
+
+
